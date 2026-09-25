@@ -76,6 +76,18 @@ Once open in Xcode, pick the `Chunky_iOS`, `Chunky_macOS`, or `Chunky_tvOS` sche
 
 Dependencies ([ZIPFoundation](https://github.com/weichsel/ZIPFoundation) and [Unrar.swift](https://github.com/mtgto/Unrar.swift)) are resolved automatically by Swift Package Manager on first build.
 
+### 🆓 Building with a free (personal) Apple account
+
+`Support/*.entitlements` is generated from `project.yml` and asks for capabilities a free account cannot grant — iCloud, plus push notifications on tvOS — so Xcode refuses to sign (`Personal development teams do not support the iCloud capability`) and nothing can be run on a device. The code doesn't need them: without the iCloud container `LibraryStorage.isICloudAvailable` is `false`, the library falls back to the local Documents folder, and CloudKit mirroring stays idle — only "save to iCloud" is missing.
+
+```bash
+Scripts/strip-icloud-entitlements.sh
+```
+
+It is idempotent, but must be re-run after every `xcodegen generate`, which restores the keys from `project.yml`. Don't use it for a build you intend to ship: release builds need iCloud.
+
+A team set in Xcode's Signing & Capabilities tab lives only in the generated `Chunky.xcodeproj` and is lost by the next `xcodegen generate` — put `DEVELOPMENT_TEAM` in `Config/Signing.local.xcconfig` instead (copy the `.example`). If Xcode then reports that the bundle identifier `com.scunio.Chunky` is not available, it is already registered to the release team: set your own in Signing & Capabilities.
+
 ## 🗂️ Project structure
 
 ```
